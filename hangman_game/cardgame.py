@@ -1,129 +1,113 @@
-from random import shuffle
+# Author : Romijul Laskar
+# Copyrights: 2022 all rights reserved
 
+# Title :- The PREDICT-The-WORD game using python
 
-class Card:
-    suits = ["spades",
-             "hearts",
-             "diamonds",
-             "clubs"]
+# importing all the required libraries
+from words import Word
 
-    values = [None, None,"2", "3",
-              "4", "5", "6", "7",
-              "8", "9", "10",
-              "Jack", "Queen",
-              "King", "Ace"]
+print('This is the PREDICT-The-WORD game. You have got 7 chances to guess the word.')
+print('BEST OF LUCK!!.. Enjoy the game..')
 
-    def __init__(self, v, s):
-        """suit + value are ints"""
-        self.value = v
-        self.suit = s
+HANGMAN = (
+    """
+    x-------x
+    """,
+    """
+    x-------x
+    |
+    |
+    |
+    |
+    |
+    """,
+    """
+    x-------x
+    |       |
+    |       0
+    |
+    |
+    |
+    """,
+    """
+    x-------x
+    |       |
+    |       0
+    |       |
+    |
+    |
+    """,
+    """
+    x-------x
+    |       |
+    |       0
+    |      /|\\
+    |
+    |
+    """,
+    """
+    x-------x
+    |       |
+    |       0
+    |      /|\\
+    |      /
+    |
+    """,
+    """
+    x-------x
+    |       |
+    |       0
+    |      /|\\
+    |      / \\
+    |
+    GAME OVER
+    """
+)
 
-    def __lt__(self, c2):
-        if self.value < c2.value:
-            return True
-        if self.value == c2.value:
-            if self.suit < c2.suit:
-                return True
-            else:
-                return False
-        return False
+MAX_ATTEMPTS = len(HANGMAN) - 1
+WORD_TO_GUESS = Word()
+HIDDEN_WORD = ['_'] * len(WORD_TO_GUESS)
+LETTERS_GUESSED = []
 
-    def __gt__(self, c2):
-        if self.value > c2.value:
-            return True
-        if self.value == c2.value:
-            if self.suit > c2.suit:
-                return True
-            else:
-                return False
-        return False
+def display_hidden_word():
+    print(' '.join(HIDDEN_WORD))
 
-    def __repr__(self):
-        v = self.values[self.value] +\
-            " of " + \
-            self.suits[self.suit]
-        return v
+def update_hidden_word(letter):
+    for index, char in enumerate(WORD_TO_GUESS):
+        if char == letter:
+            HIDDEN_WORD[index] = letter
 
+def is_word_guessed():
+    return '_' not in HIDDEN_WORD
 
-class Deck:
-    def __init__(self):
-        self.cards = []
-        for i in range(2, 15):
-            for j in range(4):
-                self.cards\
-                    .append(Card(i,
-                                 j))
-        shuffle(self.cards)
+def start_game():
+    attempts = 0
 
-    def rm_card(self):
-        if len(self.cards) == 0:
-            return
-        return self.cards.pop()
+    while attempts < MAX_ATTEMPTS:
+        display_hidden_word()
+        user_guess = input('Guess a letter: ').lower()
 
+        if user_guess in LETTERS_GUESSED:
+            print('You already guessed it.. PLEASE PAY ATTENTION!')
+            continue
 
-class Player:
-    def __init__(self, name):
-        self.wins = 0
-        self.card = None
-        self.name = name
+        LETTERS_GUESSED.append(user_guess)
 
+        if user_guess in WORD_TO_GUESS:
+            print("Going well!.. It's in the word....Excellent work!")
+            update_hidden_word(user_guess)
 
-class Game:
-    def __init__(self):
-        name1 = input("p1 name ")
-        name2 = input("p2 name ")
-        self.deck = Deck()
-        self.p1 = Player(name1)
-        self.p2 = Player(name2)
-
-    def wins(self, winner):
-        w = "{} wins this round"
-        w = w.format(winner)
-        print(w)
-
-    def draw(self, p1n, p1c, p2n, p2c):
-        d = "{} drew {} {} drew {}"
-        d = d.format(p1n,
-                     p1c,
-                     p2n,
-                     p2c)
-        print(d)
-
-    def play_game(self):
-        cards = self.deck.cards
-        print("beginning War!")
-        while len(cards) >= 2:
-            m = "q to quit. Any " + \
-                "key to play:"
-            response = input(m)
-            if response == 'q':
+            if is_word_guessed():
+                print('--------------BRILLIANT YOU WIN..!-------------')
+                print('************** Congratulations ****************')
                 break
-            p1c = self.deck.rm_card()
-            p2c = self.deck.rm_card()
-            p1n = self.p1.name
-            p2n = self.p2.name
-            self.draw(p1n,
-                      p1c,
-                      p2n,
-                      p2c)
-            if p1c > p2c:
-                self.p1.wins += 1
-                self.wins(self.p1.name)
-            else:
-                self.p2.wins += 1
-                self.wins(self.p2.name)
+        else:
+            print(f"{user_guess}.. You have tried the BEST but.. Not in my word..")
+            attempts += 1
+            print(HANGMAN[attempts])
 
-        win = self.winner(self.p1,
-                         self.p2)
-        print("War is over.{} wins"
-              .format(win))
+    if attempts == MAX_ATTEMPTS:
+        print('GAME OVER. The word was:', WORD_TO_GUESS)
 
-    def winner(self, p1, p2):
-        if p1.wins > p2.wins:
-            return p1.name
-        if p1.wins < p2.wins:
-            return p2.name
-        return "It was a tie!"
-
-game = Game()
-game.play_game()
+# starting the game
+start_game()
